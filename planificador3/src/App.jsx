@@ -2498,6 +2498,7 @@ function ShoppingListInline({ result }) {
 
 function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onShop, loading, onMealDetailLoaded }) {
   const [activeMeal, setActiveMeal] = useState(null);
+  const [activeTraining, setActiveTraining] = useState(null); // dayIdx
 
   const SLOT_KEYS   = ["desayuno", "media_m", "almuerzo", "pre", "cena"];
   const SLOT_LABELS = { desayuno: "Desayuno", media_m: "Media mañana", almuerzo: "Almuerzo", pre: "Pre-entreno", cena: "Cena" };
@@ -2545,18 +2546,24 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
               <span style={{ fontSize: 9, color: C.muted }}>Entreno</span>
             </div>
             {result.map((day, i) => {
-              const conf = config.days[i];
-              const tr   = day?.entrenamiento;
-              const gc   = GYM_COLOR[conf.gym];
+              const conf    = config.days[i];
+              const tr      = day?.entrenamiento;
+              const gc      = GYM_COLOR[conf.gym];
+              const isActive = activeTraining === i;
+              const hasActivity = conf.gym || conf.running;
               return (
-                <div key={i} style={{ background: C.card, borderRadius: 6, padding: "5px 5px",
-                  border: `1px solid ${conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
-                  minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <button key={i} onClick={() => hasActivity && setActiveTraining(isActive ? null : i)}
+                  style={{ background: isActive ? (gc || C.accent) + "20" : C.card,
+                    borderRadius: 6, padding: "5px 5px",
+                    border: `1px solid ${isActive ? (gc || C.accent) : conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
+                    minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center",
+                    cursor: hasActivity ? "pointer" : "default", fontFamily: "inherit",
+                    textAlign: "left", transition: "all 0.12s" }}>
                   {conf.gym && <div style={{ fontSize: 9, fontWeight: 700, color: gc }}>{conf.gym.toUpperCase()}</div>}
                   {conf.running && <div style={{ fontSize: 9, color: C.accent }}>Run {conf.running}</div>}
                   {tr?.duracion && <div style={{ fontSize: 8, color: C.muted }}>{tr.duracion}</div>}
-                  {!conf.gym && !conf.running && <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>}
-                </div>
+                  {!hasActivity && <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>}
+                </button>
               );
             })}
           </div>
@@ -2595,6 +2602,83 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
           ))}
         </div>
       </div>
+
+      {/* Inline training detail */}
+      {activeTraining !== null && (() => {
+        const day  = result[activeTraining];
+        const conf = config.days[activeTraining];
+        const tr   = day?.entrenamiento;
+        const gc   = GYM_COLOR[conf.gym] || C.accent;
+        if (!tr && !conf.running) return null;
+        return (
+          <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
+            <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${gc}40`, overflow: "hidden" }}>
+              {/* Header */}
+              <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between",
+                alignItems: "flex-start", borderBottom: `1px solid ${C.border}`,
+                background: gc + "10" }}>
+                <div>
+                  <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
+                    {DAY_FULL[activeTraining].toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: gc }}>
+                    {tr?.tipo || (conf.gym ? conf.gym.toUpperCase() : `Running ${conf.running}`)}
+                  </div>
+                  {tr?.duracion && (
+                    <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{tr.duracion}</div>
+                  )}
+                </div>
+                <button onClick={() => setActiveTraining(null)}
+                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
+                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                  ✕
+                </button>
+              </div>
+              {/* Exercises */}
+              <div style={{ padding: "12px 14px" }}>
+                {tr?.ejercicios?.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 8 }}>EJERCICIOS</div>
+                    {tr.ejercicios.map((ex, j) => (
+                      <div key={j} style={{ display: "flex", gap: 10, padding: "8px 0",
+                        borderBottom: j < tr.ejercicios.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                        <span style={{ color: gc, fontSize: 10, marginTop: 2, flexShrink: 0 }}>▸</span>
+                        <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{ex}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {conf.running && !tr?.ejercicios?.length && (() => {
+                  const runTips = {
+                    suave:  ["Rodaje continuo en Z2 — puedes mantener conversación", "FC objetivo: 130–145 bpm", "Cadencia: 175–180 spm", "Termina con 5 min andando"],
+                    series: ["Calentamiento 15 min suave", "Series al ritmo indicado por tu entrenador", "Recuperación completa entre series", "Vuelta a la calma 10 min"],
+                    largo:  ["Ritmo muy cómodo — nunca por encima de 155 bpm", "Gel cada 45 min a partir del km 12", "Hidratación: 500 ml/hora", "Los últimos km al mismo ritmo o más despacio"],
+                  };
+                  const tips = runTips[conf.running] || [];
+                  return (
+                    <div>
+                      <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 8 }}>INDICACIONES</div>
+                      {tips.map((tip, j) => (
+                        <div key={j} style={{ display: "flex", gap: 10, padding: "8px 0",
+                          borderBottom: j < tips.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                          <span style={{ color: C.accent, fontSize: 10, marginTop: 2, flexShrink: 0 }}>▸</span>
+                          <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+                {tr?.nota && (
+                  <div style={{ background: C.bg, borderRadius: 8, padding: "10px 12px", marginTop: 8,
+                    borderLeft: `3px solid ${gc}` }}>
+                    <div style={{ fontSize: 12, color: C.sub, fontStyle: "italic" }}>💡 {tr.nota}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Inline meal detail */}
       {activeMeal && activeMealObj && (
