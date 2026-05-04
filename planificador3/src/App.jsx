@@ -2496,9 +2496,9 @@ function ShoppingListInline({ result }) {
   );
 }
 
-function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onShop, loading, onMealDetailLoaded }) {
-  const [activeMeal, setActiveMeal] = useState(null);
-  const [activeTraining, setActiveTraining] = useState(null); // dayIdx
+function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onMealDetailLoaded }) {
+  const [activeMeal,     setActiveMeal]     = useState(null); // {dayIdx, slotKey}
+  const [activeTraining, setActiveTraining] = useState(false);
 
   const SLOT_KEYS   = ["desayuno", "media_m", "almuerzo", "pre", "cena"];
   const SLOT_LABELS = { desayuno: "Desayuno", media_m: "Media mañana", almuerzo: "Almuerzo", pre: "Pre-entreno", cena: "Cena" };
@@ -2506,220 +2506,217 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
 
   if (!result?.length) return null;
 
-  const activeMealObj = activeMeal ? result[activeMeal.dayIdx]?.comidas?.[activeMeal.slotKey] : null;
+  const day      = result[selectedDay];
+  const dayConf  = config.days[selectedDay];
+  const tr       = day?.entrenamiento;
+  const gc       = GYM_COLOR[dayConf?.gym] || C.accent;
+  const activeMealObj = activeMeal ? day?.comidas?.[activeMeal.slotKey] : null;
+
+  const runTips = {
+    suave:  ["Rodaje continuo en Z2 — puedes mantener conversación", "FC objetivo: 130–145 bpm", "Cadencia: 175–180 spm", "Termina con 5 min andando"],
+    series: ["Calentamiento 15 min suave", "Series al ritmo indicado por tu entrenador", "Recuperación completa entre series", "Vuelta a la calma 10 min"],
+    largo:  ["Ritmo muy cómodo — nunca por encima de 155 bpm", "Gel cada 45 min a partir del km 12", "Hidratación: 500 ml/hora", "Los últimos km al mismo ritmo o más despacio"],
+  };
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: C.text }}>
+    <div style={{ background: C.bg, minHeight: "100dvh", fontFamily: "'DM Sans', sans-serif",
+      color: C.text, paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
 
-      {/* Header */}
-      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: "12px 16px",
-        display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 20 }}>
-        <button onClick={onBack}
-          style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
-            padding: "5px 10px", cursor: "pointer", fontSize: 11, color: C.sub, fontFamily: "inherit" }}>
-          ← Editar
-        </button>
-        <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, flex: 1, textAlign: "center" }}>
-          Plan semanal
-        </span>
-        <div style={{ width: 60 }}/>
-      </div>
+      {/* ── STICKY HEADER ── */}
+      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`,
+        padding: "12px 16px 0", position: "sticky", top: 0, zIndex: 30,
+        paddingTop: "max(12px, env(safe-area-inset-top, 12px))" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <button onClick={onBack}
+            style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 10,
+              padding: "8px 14px", cursor: "pointer", fontSize: 13, color: C.sub, fontFamily: "inherit" }}>
+            ← Editar
+          </button>
+          <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, flex: 1, textAlign: "center" }}>
+            Plan semanal
+          </span>
+          <div style={{ width: 72 }}/>
+        </div>
 
-      {/* Weekly grid */}
-      <div style={{ overflowX: "auto", padding: "12px 8px" }}>
-        <div style={{ minWidth: 560 }}>
-
-          {/* Day headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-            <div/>
-            {result.map((day, i) => (
-              <div key={i} style={{ textAlign: "center", padding: "4px 2px" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, marginBottom: 2 }}>{DAYS[i]}</div>
-                <div style={{ fontSize: 9, color: C.muted }}>{day.kcal_total || "—"}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Training row */}
-          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <span style={{ fontSize: 9, color: C.muted }}>Entreno</span>
-            </div>
-            {result.map((day, i) => {
-              const conf    = config.days[i];
-              const tr      = day?.entrenamiento;
-              const gc      = GYM_COLOR[conf.gym];
-              const isActive = activeTraining === i;
-              const hasActivity = conf.gym || conf.running;
-              return (
-                <button key={i} onClick={() => hasActivity && setActiveTraining(isActive ? null : i)}
-                  style={{ background: isActive ? (gc || C.accent) + "20" : C.card,
-                    borderRadius: 6, padding: "5px 5px",
-                    border: `1px solid ${isActive ? (gc || C.accent) : conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
-                    minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center",
-                    cursor: hasActivity ? "pointer" : "default", fontFamily: "inherit",
-                    textAlign: "left", transition: "all 0.12s" }}>
-                  {conf.gym && <div style={{ fontSize: 9, fontWeight: 700, color: gc }}>{conf.gym.toUpperCase()}</div>}
-                  {conf.running && <div style={{ fontSize: 9, color: C.accent }}>Run {conf.running}</div>}
-                  {tr?.duracion && <div style={{ fontSize: 8, color: C.muted }}>{tr.duracion}</div>}
-                  {!hasActivity && <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Meal rows */}
-          {SLOT_KEYS.map(slotKey => (
-            <div key={slotKey} style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2 }}>{SLOT_LABELS[slotKey]}</span>
-              </div>
-              {result.map((day, i) => {
-                const meal     = day?.comidas?.[slotKey];
-                const isActive = activeMeal?.dayIdx === i && activeMeal?.slotKey === slotKey;
-                if (!meal) return (
-                  <div key={i} style={{ background: C.card, borderRadius: 6, minHeight: 48,
-                    border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: 9, color: C.muted }}>—</span>
-                  </div>
-                );
-                return (
-                  <button key={i} onClick={() => setActiveMeal(isActive ? null : { dayIdx: i, slotKey })}
-                    style={{ background: isActive ? C.accent + "20" : C.card,
-                      border: `1px solid ${isActive ? C.accent : C.border}`,
-                      borderRadius: 6, padding: "5px 5px", cursor: "pointer",
-                      fontFamily: "inherit", textAlign: "left", minHeight: 48, transition: "all 0.12s" }}>
-                    <div style={{ fontSize: 9, fontWeight: 600, color: isActive ? C.accent : C.text,
-                      lineHeight: 1.25, marginBottom: 2, overflow: "hidden",
-                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                      {meal.nombre}
-                    </div>
-                    <div style={{ fontSize: 8, color: C.muted }}>{meal.kcal} kcal</div>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+        {/* Day pills */}
+        <div style={{ display: "flex", overflowX: "auto", gap: 6, paddingBottom: 12,
+          scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+          {result.map((d, i) => {
+            const conf = config.days[i];
+            const sel  = selectedDay === i;
+            const gc2  = GYM_COLOR[conf.gym];
+            return (
+              <button key={i} onClick={() => { setSelectedDay(i); setActiveMeal(null); setActiveTraining(false); }}
+                style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center",
+                  padding: "8px 10px", borderRadius: 12, border: "none", cursor: "pointer",
+                  background: sel ? C.accent : "transparent", minWidth: 44,
+                  transition: "background 0.15s", fontFamily: "inherit" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: sel ? "#fff" : C.muted,
+                  marginBottom: 2 }}>{DAYS[i]}</span>
+                <div style={{ display: "flex", gap: 2, marginBottom: 2 }}>
+                  {conf.gym     && <div style={{ width: 5, height: 5, borderRadius: "50%",
+                    background: sel ? "rgba(255,255,255,0.7)" : (gc2 || C.blue) }}/>}
+                  {conf.running && <div style={{ width: 5, height: 5, borderRadius: "50%",
+                    background: sel ? "rgba(255,255,255,0.7)" : C.accent }}/>}
+                </div>
+                <span style={{ fontSize: 10, color: sel ? "rgba(255,255,255,0.8)" : C.muted }}>
+                  {d.kcal_total || "—"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Inline training detail */}
-      {activeTraining !== null && (() => {
-        const day  = result[activeTraining];
-        const conf = config.days[activeTraining];
-        const tr   = day?.entrenamiento;
-        const gc   = GYM_COLOR[conf.gym] || C.accent;
-        if (!tr && !conf.running) return null;
-        return (
-          <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
-            <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${gc}40`, overflow: "hidden" }}>
-              {/* Header */}
-              <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between",
-                alignItems: "flex-start", borderBottom: `1px solid ${C.border}`,
-                background: gc + "10" }}>
-                <div>
-                  <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
-                    {DAY_FULL[activeTraining].toUpperCase()}
+      {/* ── DAY CONTENT ── */}
+      <div style={{ padding: "16px 16px 0" }}>
+
+        {/* Day title + macros */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, marginBottom: 8 }}>
+            {DAY_FULL[selectedDay]}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[
+              { l: "Kcal", v: day.kcal_total, t: day.kcal_objetivo },
+              { l: "Proteína", v: day.prot_total, t: 180, u: "g" },
+            ].map(x => {
+              const ok = x.v >= (x.t || 0) * 0.92 && x.v <= (x.t || 0) * 1.1;
+              return (
+                <div key={x.l} style={{ flex: 1, background: C.card, borderRadius: 12, padding: "10px 12px",
+                  border: `1px solid ${ok ? C.accent + "40" : C.border}` }}>
+                  <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 2 }}>{x.l.toUpperCase()}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: ok ? C.accent : C.orange }}>
+                    {x.v}{x.u || ""}
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: gc }}>
-                    {tr?.tipo || (conf.gym ? conf.gym.toUpperCase() : `Running ${conf.running}`)}
-                  </div>
-                  {tr?.duracion && (
-                    <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{tr.duracion}</div>
-                  )}
+                  <div style={{ fontSize: 9, color: C.muted }}>obj. {x.t}{x.u || ""}</div>
                 </div>
-                <button onClick={() => setActiveTraining(null)}
-                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
-                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
-                  ✕
-                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Training card */}
+        {(dayConf.gym || dayConf.running) && (
+          <div style={{ marginBottom: 10 }}>
+            <button onClick={() => { setActiveTraining(!activeTraining); setActiveMeal(null); }}
+              style={{ width: "100%", background: activeTraining ? gc + "18" : C.card,
+                border: `1px solid ${activeTraining ? gc : C.border}`,
+                borderRadius: 14, padding: "14px 16px", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 12, fontFamily: "inherit",
+                textAlign: "left", transition: "all 0.15s" }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: gc + "20",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={gc} strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 10h3"/><path d="M3 14h3"/>
+                  <path d="M18 10h3"/><path d="M18 14h3"/>
+                </svg>
               </div>
-              {/* Exercises */}
-              <div style={{ padding: "12px 14px" }}>
-                {tr?.ejercicios?.length > 0 && (
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 8 }}>EJERCICIOS</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: gc }}>
+                  {tr?.tipo || (dayConf.gym ? dayConf.gym.toUpperCase() : `Running ${dayConf.running}`)}
+                </div>
+                {tr?.duracion && <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{tr.duracion}</div>}
+              </div>
+              <span style={{ fontSize: 18, color: C.muted, transition: "transform 0.2s",
+                display: "block", transform: activeTraining ? "rotate(180deg)" : "none" }}>›</span>
+            </button>
+
+            {activeTraining && (
+              <div style={{ background: C.card, border: `1px solid ${gc}30`,
+                borderTop: "none", borderRadius: "0 0 14px 14px", padding: "0 16px 16px" }}>
+                {tr?.ejercicios?.length > 0 ? (
+                  <div style={{ paddingTop: 12 }}>
                     {tr.ejercicios.map((ex, j) => (
-                      <div key={j} style={{ display: "flex", gap: 10, padding: "8px 0",
+                      <div key={j} style={{ display: "flex", gap: 12, padding: "10px 0",
                         borderBottom: j < tr.ejercicios.length - 1 ? `1px solid ${C.border}` : "none" }}>
-                        <span style={{ color: gc, fontSize: 10, marginTop: 2, flexShrink: 0 }}>▸</span>
-                        <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{ex}</span>
+                        <span style={{ color: gc, fontSize: 11, marginTop: 1, flexShrink: 0 }}>▸</span>
+                        <span style={{ fontSize: 14, color: C.text, lineHeight: 1.4 }}>{ex}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ paddingTop: 12 }}>
+                    {(runTips[dayConf.running] || []).map((tip, j) => (
+                      <div key={j} style={{ display: "flex", gap: 12, padding: "10px 0",
+                        borderBottom: j < (runTips[dayConf.running] || []).length - 1 ? `1px solid ${C.border}` : "none" }}>
+                        <span style={{ color: C.accent, fontSize: 11, marginTop: 1, flexShrink: 0 }}>▸</span>
+                        <span style={{ fontSize: 14, color: C.text, lineHeight: 1.4 }}>{tip}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                {conf.running && !tr?.ejercicios?.length && (() => {
-                  const runTips = {
-                    suave:  ["Rodaje continuo en Z2 — puedes mantener conversación", "FC objetivo: 130–145 bpm", "Cadencia: 175–180 spm", "Termina con 5 min andando"],
-                    series: ["Calentamiento 15 min suave", "Series al ritmo indicado por tu entrenador", "Recuperación completa entre series", "Vuelta a la calma 10 min"],
-                    largo:  ["Ritmo muy cómodo — nunca por encima de 155 bpm", "Gel cada 45 min a partir del km 12", "Hidratación: 500 ml/hora", "Los últimos km al mismo ritmo o más despacio"],
-                  };
-                  const tips = runTips[conf.running] || [];
-                  return (
-                    <div>
-                      <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 8 }}>INDICACIONES</div>
-                      {tips.map((tip, j) => (
-                        <div key={j} style={{ display: "flex", gap: 10, padding: "8px 0",
-                          borderBottom: j < tips.length - 1 ? `1px solid ${C.border}` : "none" }}>
-                          <span style={{ color: C.accent, fontSize: 10, marginTop: 2, flexShrink: 0 }}>▸</span>
-                          <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{tip}</span>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
                 {tr?.nota && (
-                  <div style={{ background: C.bg, borderRadius: 8, padding: "10px 12px", marginTop: 8,
+                  <div style={{ background: C.bg, borderRadius: 10, padding: "10px 14px", marginTop: 10,
                     borderLeft: `3px solid ${gc}` }}>
-                    <div style={{ fontSize: 12, color: C.sub, fontStyle: "italic" }}>💡 {tr.nota}</div>
+                    <div style={{ fontSize: 13, color: C.sub, fontStyle: "italic" }}>💡 {tr.nota}</div>
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
-        );
-      })()}
+        )}
 
-      {/* Inline meal detail */}
-      {activeMeal && activeMealObj && (
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
-          <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${C.accent}40`, overflow: "hidden" }}>
-            <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between",
-              alignItems: "flex-start", borderBottom: `1px solid ${C.border}` }}>
-              <div>
-                <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
-                  {DAY_FULL[activeMeal.dayIdx]} · {SLOT_LABELS[activeMeal.slotKey]}
+        {/* Meals */}
+        <div style={{ fontSize: 9, color: C.muted, letterSpacing: 2, marginBottom: 8 }}>COMIDAS</div>
+        {SLOT_KEYS.map(slotKey => {
+          const meal    = day?.comidas?.[slotKey];
+          const isOpen  = activeMeal?.slotKey === slotKey;
+          if (!meal) return null;
+          return (
+            <div key={slotKey} style={{ marginBottom: 8 }}>
+              <button onClick={() => { setActiveMeal(isOpen ? null : { slotKey }); setActiveTraining(false); }}
+                style={{ width: "100%", background: isOpen ? C.accent + "12" : C.card,
+                  border: `1px solid ${isOpen ? C.accent : C.border}`,
+                  borderRadius: isOpen ? "14px 14px 0 0" : 14,
+                  padding: "14px 16px", cursor: "pointer", display: "flex",
+                  alignItems: "center", gap: 12, fontFamily: "inherit",
+                  textAlign: "left", transition: "all 0.15s" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1, marginBottom: 2 }}>
+                    {SLOT_LABELS[slotKey].toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.text,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {meal.nombre}
+                  </div>
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>{activeMealObj.nombre}</div>
-                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
-                  {activeMealObj.kcal} kcal · {activeMealObj.prot}g proteína
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.accent }}>{meal.kcal}</div>
+                  <div style={{ fontSize: 10, color: C.muted }}>{meal.prot}g P</div>
                 </div>
-              </div>
-              <div style={{ display: "flex", gap: 6, flexShrink: 0, marginLeft: 10 }}>
-                <button onClick={() => setActiveMeal(null)}
-                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
-                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>✕</button>
-                <button onClick={() => { onRegenerate(activeMeal.dayIdx, activeMeal.slotKey); setActiveMeal(null); }}
-                  style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8,
-                    padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                  ↻ Cambiar
-                </button>
-              </div>
+                <span style={{ fontSize: 18, color: C.muted, transition: "transform 0.2s",
+                  display: "block", transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>
+              </button>
+
+              {isOpen && (
+                <div style={{ background: C.card, border: `1px solid ${C.accent}30`,
+                  borderTop: "none", borderRadius: "0 0 14px 14px", padding: "0 16px 14px" }}>
+                  <div style={{ paddingTop: 2, marginBottom: 10 }}>
+                    <MealDetail
+                      meal={meal} slotKey={slotKey} slotLabel={SLOT_LABELS[slotKey]}
+                      dayIdx={selectedDay}
+                      dayActivity={`${dayConf.gym || ""} ${dayConf.running || ""}`.trim()}
+                      onRegenerate={onRegenerate}
+                      isRegen={regenerating?.dayIdx === selectedDay && regenerating?.slot === slotKey}
+                      onDetailLoaded={(detail) => onMealDetailLoaded(selectedDay, slotKey, detail)}
+                      hideButton
+                    />
+                  </div>
+                  <button onClick={() => { onRegenerate(selectedDay, slotKey); setActiveMeal(null); }}
+                    disabled={regenerating?.dayIdx === selectedDay && regenerating?.slot === slotKey}
+                    style={{ width: "100%", padding: "10px 0", background: "none",
+                      border: `1px solid ${C.accent}`, borderRadius: 10,
+                      fontSize: 13, fontWeight: 600, color: C.accent, cursor: "pointer",
+                      fontFamily: "inherit", opacity: regenerating ? 0.5 : 1 }}>
+                    ↻ Sugerir alternativa
+                  </button>
+                </div>
+              )}
             </div>
-            <div style={{ padding: "12px 14px" }}>
-              <MealDetail
-                meal={activeMealObj} slotKey={activeMeal.slotKey} slotLabel={SLOT_LABELS[activeMeal.slotKey]}
-                dayIdx={activeMeal.dayIdx}
-                dayActivity={`${config.days[activeMeal.dayIdx]?.gym || ""} ${config.days[activeMeal.dayIdx]?.running || ""}`.trim()}
-                onRegenerate={onRegenerate}
-                isRegen={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
-                onDetailLoaded={(detail) => onMealDetailLoaded(activeMeal.dayIdx, activeMeal.slotKey, detail)}
-                hideButton
-              />
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       {/* Shopping list */}
       <ShoppingListInline result={result} />
