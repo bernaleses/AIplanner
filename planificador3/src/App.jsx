@@ -2194,7 +2194,7 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
     const allCats = Object.values(meals).flat();
     const found = allCats.find(r => r.name === meal.nombre);
     if (found) {
-      const detail = { ingredientes: found.ingredients || [], prep: found.prep || "" };
+      const detail = { ingredientes: found.ingredients || found.ingredientes || [], prep: found.prep || "" };
       setDetail(detail);
       onDetailLoaded(detail);
     } else {
@@ -2202,43 +2202,38 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
     }
   }
 
+  if (!detail) return (
+    <div style={{ padding: "16px 0", textAlign: "center", fontSize: 12, color: C.muted, fontStyle: "italic" }}>
+      Cargando receta...
+    </div>
+  );
+
   return (
-    <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${C.border}` }}>
-      {loading ? (
-        <div style={{ padding: "16px 0", textAlign: "center", fontSize: 12, color: C.muted, fontStyle: "italic" }}>
-          Cargando receta...
-        </div>
-      ) : (
-        <>
-          {detail?.ingredientes?.length > 0 && (
-            <div style={{ marginTop: 10, marginBottom: 10 }}>
-              <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 6 }}>INGREDIENTES</div>
-              <div style={{ background: C.bg, borderRadius: 8, overflow: "hidden" }}>
-                {detail.ingredientes.map((ing, j) => (
-                  <div key={j} style={{ fontSize: 12, color: C.text, padding: "7px 12px",
-                    borderBottom: j < detail.ingredientes.length - 1 ? `1px solid ${C.border}` : "none",
-                    display: "flex", gap: 8 }}>
-                    <span style={{ color: C.accent, fontSize: 9, marginTop: 2 }}>▸</span>{ing}
-                  </div>
-                ))}
+    <div style={{ padding: "0 0 4px" }}>
+      {detail.ingredientes?.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 6 }}>INGREDIENTES</div>
+          <div style={{ background: C.bg, borderRadius: 8, overflow: "hidden" }}>
+            {detail.ingredientes.map((ing, j) => (
+              <div key={j} style={{ fontSize: 12, color: C.text, padding: "7px 12px",
+                borderBottom: j < detail.ingredientes.length - 1 ? `1px solid ${C.border}` : "none",
+                display: "flex", gap: 8 }}>
+                <span style={{ color: C.accent, fontSize: 9, marginTop: 2 }}>▸</span>{ing}
               </div>
-            </div>
-          )}
-          {detail?.prep && (
-            <div style={{ background: C.bg, borderRadius: 8, padding: "10px 12px", marginBottom: 12 }}>
-              <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 4 }}>PREPARACIÓN</div>
-              <div style={{ fontSize: 12, color: C.sub, lineHeight: 1.7 }}>{detail.prep}</div>
-            </div>
-          )}
-        </>
+            ))}
+          </div>
+        </div>
       )}
-      {!hideButton && (
-        <button onClick={() => onRegenerate(dayIdx, slotKey)} disabled={isRegen}
-          style={{ fontSize: 11, background: "none", border: `1px solid ${C.accent}`, borderRadius: 8,
-            padding: "6px 14px", color: C.accent, cursor: isRegen ? "default" : "pointer",
-            fontFamily: "inherit", opacity: isRegen ? 0.5 : 1 }}>
-          {isRegen ? "Generando..." : "↻ Sugerir alternativa"}
-        </button>
+      {detail.prep && (
+        <div style={{ background: C.bg, borderRadius: 8, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 4 }}>PREPARACIÓN</div>
+          <div style={{ fontSize: 12, color: C.sub, lineHeight: 1.7 }}>{detail.prep}</div>
+        </div>
+      )}
+      {!detail.ingredientes?.length && !detail.prep && (
+        <div style={{ fontSize: 12, color: C.muted, fontStyle: "italic", padding: "8px 0" }}>
+          Sin detalles disponibles para esta receta.
+        </div>
       )}
     </div>
   );
@@ -2466,46 +2461,39 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
         </div>
       </div>
 
-      {/* ── INLINE SHOPPING LIST ── */}
-      <ShoppingListInline result={result} />
-
-      {/* ── MEAL DETAIL BOTTOM SHEET ── */}
+      {/* ── INLINE MEAL DETAIL (shown below grid when cell selected) ── */}
       {activeMeal && activeMealObj && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.45)" }}
-          onClick={() => setActiveMeal(null)}>
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0,
-            background: C.card, borderRadius: "18px 18px 0 0",
-            maxHeight: "72vh", display: "flex", flexDirection: "column" }}
-            onClick={e => e.stopPropagation()}>
-
-            {/* Handle */}
-            <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px" }}>
-              <div style={{ width: 36, height: 3, borderRadius: 2, background: C.border }}/>
-            </div>
-
-            {/* Sheet header */}
-            <div style={{ padding: "6px 18px 12px", flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
+          <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${C.accent}40`, overflow: "hidden" }}>
+            {/* Detail header */}
+            <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+              borderBottom: `1px solid ${C.border}` }}>
               <div>
                 <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
-                  {DAY_FULL[activeMeal.dayIdx].toUpperCase()} · {SLOT_LABELS[activeMeal.slotKey].toUpperCase()}
+                  {DAY_FULL[activeMeal.dayIdx]} · {SLOT_LABELS[activeMeal.slotKey]}
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>{activeMealObj.nombre}</div>
-                <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{activeMealObj.nombre}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
                   {activeMealObj.kcal} kcal · {activeMealObj.prot}g proteína
                 </div>
               </div>
-              <button
-                onClick={() => { onRegenerate(activeMeal.dayIdx, activeMeal.slotKey); setActiveMeal(null); }}
-                disabled={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
-                style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8,
-                  padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
-                  fontFamily: "inherit", flexShrink: 0, marginLeft: 12 }}>
-                ↻ Cambiar
-              </button>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0, marginLeft: 10 }}>
+                <button onClick={() => setActiveMeal(null)}
+                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
+                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                  ✕
+                </button>
+                <button
+                  onClick={() => { onRegenerate(activeMeal.dayIdx, activeMeal.slotKey); setActiveMeal(null); }}
+                  disabled={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
+                  style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8,
+                    padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                  ↻ Cambiar
+                </button>
+              </div>
             </div>
-
-            {/* Ingredients + prep */}
-            <div style={{ overflowY: "auto", flex: 1, padding: "0 18px 28px" }}>
+            {/* Detail body */}
+            <div style={{ padding: "12px 14px" }}>
               <MealDetail
                 meal={activeMealObj}
                 slotKey={activeMeal.slotKey}
@@ -2521,6 +2509,11 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
           </div>
         </div>
       )}
+
+      {/* ── INLINE SHOPPING LIST ── */}
+      <ShoppingListInline result={result} />
+
+
     </div>
   );
 }
