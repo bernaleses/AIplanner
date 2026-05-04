@@ -483,510 +483,610 @@ const RECIPE_INDEX = {
     {
       "name": "Tortilla de claras + avena",
       "kcal": 375,
-      "prot": 39
+      "prot": 39,
+      "tupper": false
     },
     {
       "name": "Yogurt griego + avena + plátano",
       "kcal": 365,
-      "prot": 22
+      "prot": 22,
+      "tupper": true
     },
     {
       "name": "Tostadas centeno + huevos revueltos",
       "kcal": 385,
-      "prot": 27
+      "prot": 27,
+      "tupper": false
     },
     {
       "name": "Batido proteico + avena",
       "kcal": 385,
-      "prot": 43
+      "prot": 43,
+      "tupper": true
     },
     {
       "name": "Overnight oats completo",
       "kcal": 395,
-      "prot": 21
+      "prot": 21,
+      "tupper": true
     },
     {
       "name": "Tostada centeno + aguacate + salmón ahumado",
       "kcal": 370,
-      "prot": 26
+      "prot": 26,
+      "tupper": false
     },
     {
       "name": "Protein pancakes de cottage",
       "kcal": 380,
-      "prot": 36
+      "prot": 36,
+      "tupper": true
     },
     {
       "name": "Skyr + granola sin azúcar + arándanos",
       "kcal": 355,
-      "prot": 26
+      "prot": 26,
+      "tupper": true
     },
     {
       "name": "Sándwich proteico de huevo y jamón",
       "kcal": 390,
-      "prot": 30
+      "prot": 30,
+      "tupper": false
     },
     {
       "name": "Mug cake proteico",
       "kcal": 365,
-      "prot": 34
+      "prot": 34,
+      "tupper": false
     },
     {
       "name": "Tortilla + jamón + queso fresco",
       "kcal": 375,
-      "prot": 36
+      "prot": 36,
+      "tupper": false
     },
     {
       "name": "Batido verde proteico",
       "kcal": 360,
-      "prot": 32
+      "prot": 32,
+      "tupper": true
     },
     {
       "name": "Bowl de requesón + aguacate + huevo",
       "kcal": 420,
-      "prot": 30
+      "prot": 30,
+      "tupper": true
     },
     {
       "name": "Huevos al horno en tomate",
       "kcal": 370,
-      "prot": 22
+      "prot": 22,
+      "tupper": false
     },
     {
       "name": "Gachas de arroz proteicas",
       "kcal": 370,
-      "prot": 30
+      "prot": 30,
+      "tupper": true
     },
     {
       "name": "Requesón + miel + nueces",
       "kcal": 370,
-      "prot": 28
+      "prot": 28,
+      "tupper": true
     },
     {
       "name": "Yogur griego + avena + arándanos",
       "kcal": 380,
-      "prot": 24
+      "prot": 24,
+      "tupper": true
     },
     {
       "name": "Avena con mantequilla de cacahuete + plátano",
       "kcal": 540,
-      "prot": 20
+      "prot": 20,
+      "tupper": true
     },
     {
       "name": "Wrap de huevos + jamón + queso",
       "kcal": 510,
-      "prot": 38
+      "prot": 38,
+      "tupper": false
     },
     {
       "name": "Bowl de quinoa + huevo + aguacate",
       "kcal": 560,
-      "prot": 28
+      "prot": 28,
+      "tupper": false
     },
     {
       "name": "Tostadas francesas proteicas + fruta",
       "kcal": 490,
-      "prot": 32
+      "prot": 32,
+      "tupper": false
     },
     {
       "name": "Batido hipercalórico de recuperación",
       "kcal": 620,
-      "prot": 42
+      "prot": 42,
+      "tupper": false
     },
     {
       "name": "Gofres proteicos con plátano",
       "kcal": 490,
-      "prot": 30
+      "prot": 30,
+      "tupper": false
     }
   ],
   "almuerzos": [
     {
       "name": "Pollo + arroz basmati + brócoli",
       "kcal": 520,
-      "prot": 52
+      "prot": 52,
+      "tupper": true
     },
     {
       "name": "Pollo al curry + arroz integral",
       "kcal": 510,
-      "prot": 47
+      "prot": 47,
+      "tupper": true
     },
     {
       "name": "Salmón al horno + boniato + espinacas",
       "kcal": 520,
-      "prot": 42
+      "prot": 42,
+      "tupper": true
     },
     {
       "name": "Ternera magra + quinoa + espinacas",
       "kcal": 530,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Pollo teriyaki + arroz + edamame",
       "kcal": 530,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Pollo al limón + patata + brócoli",
       "kcal": 510,
-      "prot": 44
+      "prot": 44,
+      "tupper": true
     },
     {
       "name": "Bowl de pollo asado + boniato + aguacate",
       "kcal": 540,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Carne picada + patata cocida + espinacas",
       "kcal": 540,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Ternera magra + arroz + zanahoria",
       "kcal": 500,
-      "prot": 44
+      "prot": 44,
+      "tupper": true
     },
     {
       "name": "Pollo tikka masala + arroz basmati",
       "kcal": 520,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Pollo con champiñones al ajillo + patata",
       "kcal": 510,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Pollo marroquí (chermoula) + cuscús",
       "kcal": 515,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Hamburguesa de ternera + boniato chips",
       "kcal": 530,
-      "prot": 44
+      "prot": 44,
+      "tupper": true
     },
     {
       "name": "Berenjena rellena de carne picada",
       "kcal": 570,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Wok de ternera + brócoli + arroz",
       "kcal": 510,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Pasta integral + pollo + pesto + parmesano",
       "kcal": 680,
-      "prot": 54
+      "prot": 54,
+      "tupper": true
     },
     {
       "name": "Ternera + arroz + aguacate + huevo frito",
       "kcal": 710,
-      "prot": 54
+      "prot": 54,
+      "tupper": false
     },
     {
       "name": "Bowl de salmón + arroz + edamame + aguacate",
       "kcal": 720,
-      "prot": 52
+      "prot": 52,
+      "tupper": true
     },
     {
       "name": "Pollo + boniato grande + frutos secos",
       "kcal": 690,
-      "prot": 52
+      "prot": 52,
+      "tupper": true
     },
     {
       "name": "Estofado de ternera + patata + pan centeno",
       "kcal": 650,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     }
   ],
   "cenas": [
     {
       "name": "Pollo + verduras asadas al horno",
       "kcal": 400,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Salmón al horno + calabacín",
       "kcal": 415,
-      "prot": 40
+      "prot": 40,
+      "tupper": true
     },
     {
       "name": "Tortilla de claras + espinacas + champiñones",
       "kcal": 390,
-      "prot": 41
+      "prot": 41,
+      "tupper": false
     },
     {
       "name": "Pollo + ensalada grande + huevos duros",
       "kcal": 440,
-      "prot": 54
+      "prot": 54,
+      "tupper": true
     },
     {
       "name": "Ternera + calabacín y champiñones salteados",
       "kcal": 410,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Crema de calabaza + huevo poché + pan centeno",
       "kcal": 480,
-      "prot": 24
+      "prot": 24,
+      "tupper": false
     },
     {
       "name": "Salmón al vapor con jengibre + brócoli",
       "kcal": 410,
-      "prot": 40
+      "prot": 40,
+      "tupper": true
     },
     {
       "name": "Rollitos de lechuga con carne + arroz jazmín",
       "kcal": 490,
-      "prot": 46
+      "prot": 46,
+      "tupper": false
     },
     {
       "name": "Pollo en salsa de mostaza + calabacín",
       "kcal": 405,
-      "prot": 52
+      "prot": 52,
+      "tupper": true
     },
     {
       "name": "Tortilla española proteica",
       "kcal": 430,
-      "prot": 38
+      "prot": 38,
+      "tupper": true
     },
     {
       "name": "Pollo al ajillo + espárragos trigueros",
       "kcal": 390,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Sopa de pollo con fideos",
       "kcal": 390,
-      "prot": 42
+      "prot": 42,
+      "tupper": true
     },
     {
       "name": "Revuelto de claras + gambas + espárragos + patata",
       "kcal": 490,
-      "prot": 48
+      "prot": 48,
+      "tupper": false
     },
     {
       "name": "Pollo con berenjena al horno",
       "kcal": 400,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Ternera + champiñones + crema de coliflor",
       "kcal": 410,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Pollo al pesto + calabacín a la plancha",
       "kcal": 420,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Ternera magra + espárragos + AOVE",
       "kcal": 400,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Pollo + ensalada + aguacate",
       "kcal": 430,
-      "prot": 46
+      "prot": 46,
+      "tupper": true
     },
     {
       "name": "Salmón al horno + patata + ensalada AOVE",
       "kcal": 540,
-      "prot": 44
+      "prot": 44,
+      "tupper": false
     },
     {
       "name": "Pollo al horno + boniato + guacamole",
       "kcal": 560,
-      "prot": 50
+      "prot": 50,
+      "tupper": true
     },
     {
       "name": "Ternera + arroz basmati + brócoli + AOVE",
       "kcal": 530,
-      "prot": 48
+      "prot": 48,
+      "tupper": true
     },
     {
       "name": "Tortilla española + ensalada + pan centeno",
       "kcal": 520,
-      "prot": 36
+      "prot": 36,
+      "tupper": false
     },
     {
       "name": "Pasta integral + ternera + salsa de tomate",
       "kcal": 550,
-      "prot": 44
+      "prot": 44,
+      "tupper": true
     }
   ],
   "media_manana": [
     {
       "name": "Skyr + frutos rojos + granola + almendras",
       "kcal": 310,
-      "prot": 24
+      "prot": 24,
+      "tupper": true
     },
     {
       "name": "Huevos duros + aguacate + tomate",
       "kcal": 250,
-      "prot": 16
+      "prot": 16,
+      "tupper": true
     },
     {
       "name": "Tortilla de claras + pavo + queso",
       "kcal": 220,
-      "prot": 30
+      "prot": 30,
+      "tupper": true
     },
     {
       "name": "Jamón ibérico + manzana",
       "kcal": 175,
-      "prot": 14
+      "prot": 14,
+      "tupper": false
     },
     {
       "name": "Smoothie proteico express",
       "kcal": 165,
-      "prot": 22
+      "prot": 22,
+      "tupper": false
     },
     {
       "name": "Queso fresco + pepino + nueces + tomate",
       "kcal": 270,
-      "prot": 18
+      "prot": 18,
+      "tupper": true
     },
     {
       "name": "Pollo frío + tortitas de arroz + mostaza",
       "kcal": 250,
-      "prot": 32
+      "prot": 32,
+      "tupper": true
     },
     {
       "name": "Mix de nueces + arándanos secos",
       "kcal": 180,
-      "prot": 4
+      "prot": 4,
+      "tupper": false
     },
     {
       "name": "Café proteico (protein latte)",
       "kcal": 160,
-      "prot": 22
+      "prot": 22,
+      "tupper": false
     },
     {
       "name": "Zanahoria + hummus de yogur + almendras",
       "kcal": 270,
-      "prot": 16
+      "prot": 16,
+      "tupper": true
     },
     {
       "name": "Yogurt griego + nueces",
       "kcal": 200,
-      "prot": 16
+      "prot": 16,
+      "tupper": true
     },
     {
       "name": "Requesón + fresas + avena + miel",
       "kcal": 250,
-      "prot": 18
+      "prot": 18,
+      "tupper": true
     },
     {
       "name": "Jamón serrano + pan integral",
       "kcal": 175,
-      "prot": 16
+      "prot": 16,
+      "tupper": false
     },
     {
       "name": "2 huevos cocidos + mandarina",
       "kcal": 190,
-      "prot": 14
+      "prot": 14,
+      "tupper": true
     },
     {
       "name": "Almendras + manzana",
       "kcal": 195,
-      "prot": 5
+      "prot": 5,
+      "tupper": false
     },
     {
       "name": "Tostada + mantequilla de cacahuete + plátano",
       "kcal": 430,
-      "prot": 14
+      "prot": 14,
+      "tupper": false
     },
     {
       "name": "Batido de plátano + avena + almendras",
       "kcal": 460,
-      "prot": 32
+      "prot": 32,
+      "tupper": false
     },
     {
       "name": "Yogur + granola + fruta + nueces",
       "kcal": 380,
-      "prot": 20
+      "prot": 20,
+      "tupper": true
     },
     {
       "name": "Pan integral + aguacate + huevo duro",
       "kcal": 410,
-      "prot": 22
+      "prot": 22,
+      "tupper": false
     }
   ],
   "pre_entreno": [
     {
       "name": "Arroz blanco + pollo + soja",
       "kcal": 380,
-      "prot": 38
+      "prot": 38,
+      "tupper": true
     },
     {
       "name": "Boniato cocido + pollo frío",
       "kcal": 360,
-      "prot": 32
+      "prot": 32,
+      "tupper": true
     },
     {
       "name": "Tostada integral + miel + requesón",
       "kcal": 310,
-      "prot": 16
+      "prot": 16,
+      "tupper": false
     },
     {
       "name": "Batido tropical pre-entreno",
       "kcal": 280,
-      "prot": 26
+      "prot": 26,
+      "tupper": false
     },
     {
       "name": "Dátiles + almendras + whey disuelto",
       "kcal": 290,
-      "prot": 18
+      "prot": 18,
+      "tupper": false
     },
     {
       "name": "Bowl mini de avena + miel + plátano",
       "kcal": 270,
-      "prot": 8
+      "prot": 8,
+      "tupper": true
     },
     {
       "name": "Yogur + fruta + avena + miel (pre-entreno suave)",
       "kcal": 350,
-      "prot": 20
+      "prot": 20,
+      "tupper": true
     },
     {
       "name": "Galletas de avena caseras",
       "kcal": 295,
-      "prot": 10
+      "prot": 10,
+      "tupper": true
     },
     {
       "name": "Batido de mango + chía + whey",
       "kcal": 285,
-      "prot": 28
+      "prot": 28,
+      "tupper": false
     },
     {
       "name": "Protein pancakes pre-entreno",
       "kcal": 330,
-      "prot": 30
+      "prot": 30,
+      "tupper": true
     },
     {
       "name": "Batido whey + plátano + leche (post-entreno)",
       "kcal": 320,
-      "prot": 30
+      "prot": 30,
+      "tupper": false
     },
     {
       "name": "Plátano + whey",
       "kcal": 235,
-      "prot": 26
+      "prot": 26,
+      "tupper": false
     },
     {
       "name": "Yogur griego + miel + plátano + almendras",
       "kcal": 340,
-      "prot": 22
+      "prot": 22,
+      "tupper": true
     },
     {
       "name": "Sándwich integral + pollo + aguacate",
       "kcal": 370,
-      "prot": 28
+      "prot": 28,
+      "tupper": false
     },
     {
       "name": "Tortitas de arroz + cacahuete + plátano + whey",
       "kcal": 370,
-      "prot": 22
+      "prot": 22,
+      "tupper": false
     }
   ]
 };
@@ -1097,20 +1197,22 @@ ${prof.bodyfat ? `- % Grasa corporal: ${prof.bodyfat}%` : ""}
 SEMANA:
 ${dayLines}
 
-CATÁLOGO DE RECETAS (elige SOLO de esta lista):
-Desayunos: ${RECIPE_INDEX.desayunos.map(r => `${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
-Media mañana: ${RECIPE_INDEX.media_manana.map(r => `${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
-Almuerzos: ${RECIPE_INDEX.almuerzos.map(r => `${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
-Pre-entreno: ${RECIPE_INDEX.pre_entreno.map(r => `${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
-Cenas: ${RECIPE_INDEX.cenas.map(r => `${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
+CATÁLOGO DE RECETAS (★=tupper friendly, elige SOLO de esta lista):
+Desayunos: ${RECIPE_INDEX.desayunos.map(r => `${r.tupper?"★":""}${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
+Media mañana: ${RECIPE_INDEX.media_manana.map(r => `${r.tupper?"★":""}${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
+Almuerzos: ${RECIPE_INDEX.almuerzos.map(r => `${r.tupper?"★":""}${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
+Pre-entreno: ${RECIPE_INDEX.pre_entreno.map(r => `${r.tupper?"★":""}${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
+Cenas: ${RECIPE_INDEX.cenas.map(r => `${r.tupper?"★":""}${r.name} (${r.kcal}kcal,${r.prot}P)`).join(" | ")}
 
 REGLAS IMPORTANTES:
+- Prioriza recetas con tupper:true para almuerzos y cenas — facilitan el batch cooking
+- BATCH COOKING: reutiliza ingredientes principales en días consecutivos. Ej: si el lunes hay pollo+brócoli, el martes puede tener pollo+quinoa (mismo pollo, distinta receta). Planifica para que se cocine brócoli para 2-3 días, no uno solo.
 - Los días de running largo: +200-300kcal extra en carbos (almuerzo más grande)
 - Los días de gym+running: pre-entreno siempre presente y con carbos
 - Los días de descanso: sin pre-entreno, cena más ligera
-- Si hay cena libre: marca como "Cena libre (fuera)" y pon un placeholder
+- Si hay cena libre: usa "Cena libre (fuera)" como nombre
 - Siempre mínimo 180g de proteína total diaria
-- Varía las recetas durante la semana (no repetir la misma dos días seguidos)
+- Varía las recetas pero comparte ingredientes base entre días para minimizar compra
 
 Genera SOLO nombres y macros, SIN ingredientes ni preparación:
 {"dias":[
@@ -2143,6 +2245,137 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
 }
 
 // ─── RESULT VIEW ──────────────────────────────────────────────
+// ─── INLINE SHOPPING LIST ─────────────────────────────────────
+function ShoppingListInline({ result }) {
+  const [checked, setChecked] = useState({});
+
+  // Build consolidated ingredient list from all meals
+  const ingredientMap = {};
+  result?.forEach(day => {
+    Object.values(day.comidas || {}).forEach(meal => {
+      if (!meal?.ingredientes) return;
+      meal.ingredientes.forEach(ing => {
+        // Clean ingredient string to get base item name
+        const clean = ing.toLowerCase()
+          .replace(/\d+[gml]+\s*/g, '')
+          .replace(/\(.*?\)/g, '')
+          .replace(/^\d+\s*/, '')
+          .trim();
+        // Group by first meaningful words
+        const key = clean.split(/[,+·]/)[0].trim();
+        if (key.length < 3) return;
+        if (!ingredientMap[key]) ingredientMap[key] = { label: ing, count: 0, days: [] };
+        ingredientMap[key].count++;
+      });
+    });
+  });
+
+  // Also collect from meals database for any named recipe
+  const allMeals = Object.values(meals).flat();
+  result?.forEach((day, di) => {
+    Object.values(day.comidas || {}).forEach(meal => {
+      if (!meal?.nombre) return;
+      const found = allMeals.find(m => m.name === meal.nombre);
+      if (found?.ingredients) {
+        found.ingredients.forEach(ing => {
+          const key = ing.toLowerCase().replace(/\d+[gml]+\s*/g, '').replace(/\(.*?\)/g, '').trim().split(/[,+·]/)[0].trim();
+          if (key.length < 3) return;
+          if (!ingredientMap[key]) ingredientMap[key] = { label: ing, count: 0, days: [] };
+          ingredientMap[key].count = Math.max(ingredientMap[key].count, 1);
+        });
+      }
+    });
+  });
+
+  // Sort by frequency (most used first = batch cooking wins)
+  const items = Object.entries(ingredientMap)
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([key, val]) => ({ key, label: val.label, count: val.count }));
+
+  // Group into categories
+  function getCategory(item) {
+    const l = item.toLowerCase();
+    if (/pollo|ternera|salmón|salmon|atún|atun|huevo|clara|whey|proteína|jamón|gambas|bacalao|pavo|requesón/.test(l)) return "🥩 Proteínas";
+    if (/yogur|yogurt|leche|queso|skyr|mozzarella|parmesano|kéfir/.test(l)) return "🥛 Lácteos";
+    if (/arroz|avena|patata|boniato|pan|quinoa|pasta|tortita|granola|pan|brioche/.test(l)) return "🌾 Carbohidratos";
+    if (/brócoli|espinaca|calabacín|berenjena|champiñon|zanahoria|tomate|pepino|lechuga|cebolla|espárrago|coliflor|aguacate|plátano|fresa|arándano|manzana|naranja|mango|fruta|verdura/.test(l)) return "🥦 Frutas y Verduras";
+    if (/almendra|nuez|nueces|cacahuete|pistacho|semilla|chía/.test(l)) return "🥜 Frutos Secos";
+    return "🧂 Condimentos";
+  }
+
+  const grouped = {};
+  items.forEach(item => {
+    const cat = getCategory(item.label);
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(item);
+  });
+
+  const totalItems = items.length;
+  const doneCount = Object.keys(checked).length;
+
+  return (
+    <div style={{ padding: "0 8px 40px", maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, marginTop: 8 }}>
+        <div style={{ fontSize: 9, color: C.muted, letterSpacing: 2 }}>LISTA DE COMPRA SEMANAL</div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ fontSize: 10, color: C.muted }}>{doneCount}/{totalItems}</span>
+          {doneCount > 0 && (
+            <button onClick={() => setChecked({})}
+              style={{ fontSize: 10, color: C.muted, background: "none", border: `1px solid ${C.border}`,
+                borderRadius: 6, padding: "2px 8px", cursor: "pointer", fontFamily: "inherit" }}>
+              Resetear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ background: C.border, borderRadius: 4, height: 4, marginBottom: 16, overflow: "hidden" }}>
+        <div style={{ height: 4, background: C.accent, width: `${totalItems ? (doneCount/totalItems)*100 : 0}%`, transition: "width 0.3s", borderRadius: 4 }}/>
+      </div>
+
+      {Object.entries(grouped).map(([cat, catItems]) => (
+        <div key={cat} style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: 1,
+            borderBottom: `1px solid ${C.border}`, paddingBottom: 6, marginBottom: 8 }}>
+            {cat}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+            {catItems.map(item => {
+              const done = !!checked[item.key];
+              return (
+                <button key={item.key} onClick={() => setChecked(p => ({ ...p, [item.key]: !p[item.key] }))}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px",
+                    background: done ? C.accent + "10" : C.card,
+                    border: `1px solid ${done ? C.accent + "40" : C.border}`,
+                    borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                    border: `2px solid ${done ? C.accent : C.border}`,
+                    background: done ? C.accent : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  <div style={{ flex: 1, overflow: "hidden" }}>
+                    <div style={{ fontSize: 11, color: done ? C.muted : C.text,
+                      textDecoration: done ? "line-through" : "none",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {item.label}
+                    </div>
+                    {item.count > 1 && (
+                      <div style={{ fontSize: 9, color: C.accent }}>× {item.count} días</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onShop, loading, onMealDetailLoaded }) {
   const [activeMeal, setActiveMeal] = useState(null); // {dayIdx, slotKey}
 
@@ -2169,12 +2402,7 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
         <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, flex: 1, textAlign: "center" }}>
           Plan semanal
         </span>
-        <button onClick={onShop} disabled={loading}
-          style={{ background: C.accent + "18", border: `1px solid ${C.accent}40`, borderRadius: 8,
-            padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 600, color: C.accent,
-            fontFamily: "inherit", opacity: loading ? 0.5 : 1 }}>
-          {loading ? "..." : "🛒 Compra"}
-        </button>
+<div style={{ width: 60 }}/>
       </div>
 
       {/* ── WEEKLY GRID ── */}
@@ -2237,6 +2465,9 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
           ))}
         </div>
       </div>
+
+      {/* ── INLINE SHOPPING LIST ── */}
+      <ShoppingListInline result={result} />
 
       {/* ── MEAL DETAIL BOTTOM SHEET ── */}
       {activeMeal && activeMealObj && (
