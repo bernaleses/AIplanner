@@ -2495,3 +2495,150 @@ function ShoppingListInline({ result }) {
     </div>
   );
 }
+
+function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onShop, loading, onMealDetailLoaded }) {
+  const [activeMeal, setActiveMeal] = useState(null);
+
+  const SLOT_KEYS   = ["desayuno", "media_m", "almuerzo", "pre", "cena"];
+  const SLOT_LABELS = { desayuno: "Desayuno", media_m: "Media mañana", almuerzo: "Almuerzo", pre: "Pre-entreno", cena: "Cena" };
+  const GYM_COLOR   = { push: "#1a5c8a", pull: "#3a7d5a", pierna: "#8e24aa", fullbody: "#c47a1a" };
+
+  if (!result?.length) return null;
+
+  const activeMealObj = activeMeal ? result[activeMeal.dayIdx]?.comidas?.[activeMeal.slotKey] : null;
+
+  return (
+    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: C.text }}>
+
+      {/* Header */}
+      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: "12px 16px",
+        display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 20 }}>
+        <button onClick={onBack}
+          style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
+            padding: "5px 10px", cursor: "pointer", fontSize: 11, color: C.sub, fontFamily: "inherit" }}>
+          ← Editar
+        </button>
+        <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, flex: 1, textAlign: "center" }}>
+          Plan semanal
+        </span>
+        <div style={{ width: 60 }}/>
+      </div>
+
+      {/* Weekly grid */}
+      <div style={{ overflowX: "auto", padding: "12px 8px" }}>
+        <div style={{ minWidth: 560 }}>
+
+          {/* Day headers */}
+          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+            <div/>
+            {result.map((day, i) => (
+              <div key={i} style={{ textAlign: "center", padding: "4px 2px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, marginBottom: 2 }}>{DAYS[i]}</div>
+                <div style={{ fontSize: 9, color: C.muted }}>{day.kcal_total || "—"}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Training row */}
+          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span style={{ fontSize: 9, color: C.muted }}>Entreno</span>
+            </div>
+            {result.map((day, i) => {
+              const conf = config.days[i];
+              const tr   = day?.entrenamiento;
+              const gc   = GYM_COLOR[conf.gym];
+              return (
+                <div key={i} style={{ background: C.card, borderRadius: 6, padding: "5px 5px",
+                  border: `1px solid ${conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
+                  minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  {conf.gym && <div style={{ fontSize: 9, fontWeight: 700, color: gc }}>{conf.gym.toUpperCase()}</div>}
+                  {conf.running && <div style={{ fontSize: 9, color: C.accent }}>Run {conf.running}</div>}
+                  {tr?.duracion && <div style={{ fontSize: 8, color: C.muted }}>{tr.duracion}</div>}
+                  {!conf.gym && !conf.running && <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Meal rows */}
+          {SLOT_KEYS.map(slotKey => (
+            <div key={slotKey} style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2 }}>{SLOT_LABELS[slotKey]}</span>
+              </div>
+              {result.map((day, i) => {
+                const meal     = day?.comidas?.[slotKey];
+                const isActive = activeMeal?.dayIdx === i && activeMeal?.slotKey === slotKey;
+                if (!meal) return (
+                  <div key={i} style={{ background: C.card, borderRadius: 6, minHeight: 48,
+                    border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: 9, color: C.muted }}>—</span>
+                  </div>
+                );
+                return (
+                  <button key={i} onClick={() => setActiveMeal(isActive ? null : { dayIdx: i, slotKey })}
+                    style={{ background: isActive ? C.accent + "20" : C.card,
+                      border: `1px solid ${isActive ? C.accent : C.border}`,
+                      borderRadius: 6, padding: "5px 5px", cursor: "pointer",
+                      fontFamily: "inherit", textAlign: "left", minHeight: 48, transition: "all 0.12s" }}>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: isActive ? C.accent : C.text,
+                      lineHeight: 1.25, marginBottom: 2, overflow: "hidden",
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                      {meal.nombre}
+                    </div>
+                    <div style={{ fontSize: 8, color: C.muted }}>{meal.kcal} kcal</div>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Inline meal detail */}
+      {activeMeal && activeMealObj && (
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
+          <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${C.accent}40`, overflow: "hidden" }}>
+            <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between",
+              alignItems: "flex-start", borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
+                  {DAY_FULL[activeMeal.dayIdx]} · {SLOT_LABELS[activeMeal.slotKey]}
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{activeMealObj.nombre}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+                  {activeMealObj.kcal} kcal · {activeMealObj.prot}g proteína
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0, marginLeft: 10 }}>
+                <button onClick={() => setActiveMeal(null)}
+                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
+                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>✕</button>
+                <button onClick={() => { onRegenerate(activeMeal.dayIdx, activeMeal.slotKey); setActiveMeal(null); }}
+                  style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8,
+                    padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                  ↻ Cambiar
+                </button>
+              </div>
+            </div>
+            <div style={{ padding: "12px 14px" }}>
+              <MealDetail
+                meal={activeMealObj} slotKey={activeMeal.slotKey} slotLabel={SLOT_LABELS[activeMeal.slotKey]}
+                dayIdx={activeMeal.dayIdx}
+                dayActivity={`${config.days[activeMeal.dayIdx]?.gym || ""} ${config.days[activeMeal.dayIdx]?.running || ""}`.trim()}
+                onRegenerate={onRegenerate}
+                isRegen={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
+                onDetailLoaded={(detail) => onMealDetailLoaded(activeMeal.dayIdx, activeMeal.slotKey, detail)}
+                hideButton
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shopping list */}
+      <ShoppingListInline result={result} />
+    </div>
+  );
+}
