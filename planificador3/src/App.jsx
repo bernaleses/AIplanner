@@ -1134,8 +1134,14 @@ const TRAINING_EXAMPLES = {
 // ─── MAIN APP ─────────────────────────────────────────────────
 export default function App() {
   const [step, setStep] = useLocalStorage("forma_step", "setup");
-  // Safety: if stuck in "generating" on load, recover
+  // Cache busting: wipe stale localStorage on version change
+  const APP_VERSION = "v4";
   useEffect(() => {
+    const stored = localStorage.getItem("forma_version");
+    if (stored !== APP_VERSION) {
+      ["forma_step","forma_result","forma_weekconfig"].forEach(k => localStorage.removeItem(k));
+      localStorage.setItem("forma_version", APP_VERSION);
+    }
     if (step === "generating") setStep("setup");
   }, []);
   const [profile, setProfile] = useLocalStorage("forma_profile", DEFAULT_PROFILE);
