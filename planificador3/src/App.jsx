@@ -2180,6 +2180,68 @@ function LoadingView() {
 // ─── MEAL DETAIL — loads ingredients+prep on demand ──────────
 
 // ─── MEAL DETAIL — loads ingredients+prep on demand ──────────
+const SHOP_ITEMS = [
+  { name: "Pechuga de pollo", cat: "Proteínas" }, { name: "Muslo de pollo sin piel", cat: "Proteínas" },
+  { name: "Ternera magra", cat: "Proteínas" }, { name: "Ternera picada magra 5%", cat: "Proteínas" },
+  { name: "Salmón fresco", cat: "Proteínas" }, { name: "Salmón ahumado", cat: "Proteínas" },
+  { name: "Atún al natural (bote)", cat: "Proteínas" }, { name: "Gambas peladas", cat: "Proteínas" },
+  { name: "Huevos", cat: "Proteínas" }, { name: "Claras de huevo", cat: "Proteínas" },
+  { name: "Jamón serrano", cat: "Proteínas" }, { name: "Proteína whey", cat: "Proteínas" },
+  { name: "Requesón / Cottage 0%", cat: "Proteínas" },
+  { name: "Yogurt griego 0%", cat: "Lácteos" }, { name: "Skyr natural", cat: "Lácteos" },
+  { name: "Leche desnatada", cat: "Lácteos" }, { name: "Queso fresco batido 0%", cat: "Lácteos" },
+  { name: "Mozzarella light", cat: "Lácteos" }, { name: "Parmesano rallado", cat: "Lácteos" },
+  { name: "Avena en copos", cat: "Carbohidratos" }, { name: "Arroz basmati", cat: "Carbohidratos" },
+  { name: "Arroz integral", cat: "Carbohidratos" }, { name: "Arroz blanco", cat: "Carbohidratos" },
+  { name: "Quinoa", cat: "Carbohidratos" }, { name: "Patata", cat: "Carbohidratos" },
+  { name: "Boniato", cat: "Carbohidratos" }, { name: "Pan de centeno", cat: "Carbohidratos" },
+  { name: "Pan integral", cat: "Carbohidratos" }, { name: "Tortitas de arroz", cat: "Carbohidratos" },
+  { name: "Granola sin azúcar", cat: "Carbohidratos" }, { name: "Pasta integral", cat: "Carbohidratos" },
+  { name: "Brócoli", cat: "Frutas y Verduras" }, { name: "Espinacas frescas", cat: "Frutas y Verduras" },
+  { name: "Calabacín", cat: "Frutas y Verduras" }, { name: "Berenjena", cat: "Frutas y Verduras" },
+  { name: "Champiñones", cat: "Frutas y Verduras" }, { name: "Zanahoria", cat: "Frutas y Verduras" },
+  { name: "Cebolla", cat: "Frutas y Verduras" }, { name: "Tomate cherry", cat: "Frutas y Verduras" },
+  { name: "Tomate triturado (bote)", cat: "Frutas y Verduras" }, { name: "Pepino", cat: "Frutas y Verduras" },
+  { name: "Lechuga", cat: "Frutas y Verduras" }, { name: "Espárragos trigueros", cat: "Frutas y Verduras" },
+  { name: "Edamame (congelado)", cat: "Frutas y Verduras" }, { name: "Calabaza", cat: "Frutas y Verduras" },
+  { name: "Aguacate", cat: "Frutas y Verduras" }, { name: "Plátano", cat: "Frutas y Verduras" },
+  { name: "Fresas", cat: "Frutas y Verduras" }, { name: "Arándanos", cat: "Frutas y Verduras" },
+  { name: "Manzana", cat: "Frutas y Verduras" }, { name: "Mandarina", cat: "Frutas y Verduras" },
+  { name: "Mango", cat: "Frutas y Verduras" }, { name: "Frutos rojos (congelados)", cat: "Frutas y Verduras" },
+  { name: "Almendras", cat: "Frutos Secos" }, { name: "Nueces", cat: "Frutos Secos" },
+  { name: "Crema de cacahuete natural", cat: "Frutos Secos" }, { name: "Semillas de chía", cat: "Frutos Secos" },
+  { name: "Aceite de oliva (AOVE)", cat: "Condimentos" }, { name: "Miel", cat: "Condimentos" },
+  { name: "Mostaza de Dijon", cat: "Condimentos" }, { name: "Salsa de soja light", cat: "Condimentos" },
+  { name: "Ajo (cabeza)", cat: "Condimentos" }, { name: "Jengibre fresco", cat: "Condimentos" },
+  { name: "Caldo de pollo bajo en sal", cat: "Condimentos" }, { name: "Curry en polvo", cat: "Condimentos" },
+  { name: "Cúrcuma", cat: "Condimentos" }, { name: "Pimentón dulce/ahumado", cat: "Condimentos" },
+  { name: "Orégano seco", cat: "Condimentos" }, { name: "Sésamo", cat: "Condimentos" },
+  { name: "Tahini", cat: "Condimentos" }, { name: "Espresso / café", cat: "Condimentos" },
+];
+
+// Match a raw ingredient string to a SHOP_ITEM
+function matchToShopItem(rawIng) {
+  const cleaned = rawIng.toLowerCase()
+    .replace(/\d+[gml]+\s*/g, '').replace(/\(.*?\)/g, '')
+    .replace(/^\d+\s*/, '').replace(/→.*$/, '').trim();
+  const parts = cleaned.split(/[,+·]/).map(p => p.trim()).filter(p => p.length > 2);
+  const stopWords = new Set(['spray','light','fresco','natural','seco','cocido','entero','cruda','puro','molido','desnatada']);
+  const found = new Set();
+  parts.forEach(part => {
+    let match = SHOP_ITEMS.find(si => si.name.toLowerCase() === part);
+    if (!match) match = SHOP_ITEMS.find(si => { const sn = si.name.toLowerCase(); return part.includes(sn) && sn.length > 4; });
+    if (!match) match = SHOP_ITEMS.find(si => { const sn = si.name.toLowerCase(); return sn.includes(part) && part.length > 5; });
+    if (!match) {
+      const words = part.split(' ').filter(w => w.length >= 5 && !stopWords.has(w));
+      match = SHOP_ITEMS.find(si => words.some(w => si.name.toLowerCase().includes(w)));
+    }
+    if (match) found.add(match.name);
+  });
+  return [...found];
+}
+
+
+// ─── MEAL DETAIL ──────────────────────────────────────────────
 function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerate, isRegen, onDetailLoaded, hideButton }) {
   const [detail, setDetail] = useState(
     meal.ingredientes?.length ? { ingredientes: meal.ingredientes, prep: meal.prep } : null
@@ -2190,21 +2252,20 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
   }, []);
 
   function fetchDetail() {
-    // Look up in the local meals database — no API call needed
     const allCats = Object.values(meals).flat();
     const found = allCats.find(r => r.name === meal.nombre);
     if (found) {
-      const detail = { ingredientes: found.ingredients || found.ingredientes || [], prep: found.prep || "" };
-      setDetail(detail);
-      onDetailLoaded(detail);
+      const d = { ingredientes: found.ingredients || found.ingredientes || [], prep: found.prep || "" };
+      setDetail(d);
+      onDetailLoaded(d);
     } else {
-      setDetail({ ingredientes: [], prep: "Receta no encontrada en el catálogo." });
+      setDetail({ ingredientes: [], prep: "" });
     }
   }
 
   if (!detail) return (
-    <div style={{ padding: "16px 0", textAlign: "center", fontSize: 12, color: C.muted, fontStyle: "italic" }}>
-      Cargando receta...
+    <div style={{ padding: "12px 0", textAlign: "center", fontSize: 12, color: C.muted, fontStyle: "italic" }}>
+      Cargando...
     </div>
   );
 
@@ -2232,14 +2293,14 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
       )}
       {!detail.ingredientes?.length && !detail.prep && (
         <div style={{ fontSize: 12, color: C.muted, fontStyle: "italic", padding: "8px 0" }}>
-          Sin detalles disponibles para esta receta.
+          Sin detalles disponibles.
         </div>
       )}
     </div>
   );
 }
 
-// ─── RESULT VIEW ──────────────────────────────────────────────
+
 // ─── INLINE SHOPPING LIST ─────────────────────────────────────
 function ShoppingListInline({ result }) {
   const [checked, setChecked] = useState({});
@@ -2412,11 +2473,42 @@ function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate,
               return (
                 <div key={i} style={{ textAlign: "center", padding: "4px 2px" }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, marginBottom: 2 }}>{DAYS[i]}</div>
-                  <div style={{ display: "flex", gap: 2, justifyContent: "center", marginBottom: 2 }}>
-                    {conf.gym     && <div style={{ width: 5, height: 5, borderRadius: "50%", background: GYM_COLOR[conf.gym] || C.blue }}/>}
-                    {conf.running && <div style={{ width: 5, height: 5, borderRadius: "50%", background: C.accent }}/>}
-                  </div>
                   <div style={{ fontSize: 9, color: C.muted }}>{day.kcal_total || "—"}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Training row */}
+          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span style={{ fontSize: 9, color: C.muted }}>Entreno</span>
+            </div>
+            {result.map((day, i) => {
+              const conf = config.days[i];
+              const tr = day?.entrenamiento;
+              const gc = GYM_COLOR[conf.gym];
+              const noActivity = !conf.gym && !conf.running;
+              return (
+                <div key={i} style={{ background: C.card, borderRadius: 6, padding: "5px 5px",
+                  border: `1px solid ${conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
+                  minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  {conf.gym && (
+                    <div style={{ fontSize: 9, fontWeight: 700, color: gc, lineHeight: 1.2 }}>
+                      {conf.gym.toUpperCase()}
+                    </div>
+                  )}
+                  {conf.running && (
+                    <div style={{ fontSize: 9, color: C.accent, lineHeight: 1.2 }}>
+                      Run {conf.running}
+                    </div>
+                  )}
+                  {tr?.duracion && (
+                    <div style={{ fontSize: 8, color: C.muted }}>{tr.duracion}</div>
+                  )}
+                  {noActivity && (
+                    <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>
+                  )}
                 </div>
               );
             })}
