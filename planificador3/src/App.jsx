@@ -2303,309 +2303,189 @@ function MealDetail({ meal, slotKey, slotLabel, dayIdx, dayActivity, onRegenerat
 
 // ─── INLINE SHOPPING LIST ─────────────────────────────────────
 function ShoppingListInline({ result }) {
-  const [checked, setChecked] = useState({});
+  const SLOT_KEYS  = ["desayuno", "media_m", "almuerzo", "pre", "cena"];
+  const SLOT_SHORT = { desayuno: "Desayuno", media_m: "Media m.", almuerzo: "Almuerzo", pre: "Pre-e.", cena: "Cena" };
+  const DAY_SHORT  = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 
-  // Build consolidated ingredient list from all meals
-  const ingredientMap = {};
-  result?.forEach(day => {
-    Object.values(day.comidas || {}).forEach(meal => {
-      if (!meal?.ingredientes) return;
-      meal.ingredientes.forEach(ing => {
-        // Clean ingredient string to get base item name
-        const clean = ing.toLowerCase()
-          .replace(/\d+[gml]+\s*/g, '')
-          .replace(/\(.*?\)/g, '')
-          .replace(/^\d+\s*/, '')
-          .trim();
-        // Group by first meaningful words
-        const key = clean.split(/[,+·]/)[0].trim();
-        if (key.length < 3) return;
-        if (!ingredientMap[key]) ingredientMap[key] = { label: ing, count: 0, days: [] };
-        ingredientMap[key].count++;
-      });
-    });
-  });
+  // Which meals are selected — default none
+  const [selected, setSelected] = useState({});
+  const [shopItems, setShopItems] = useState(null);
+  const [checked, setChecked]   = useState({});
 
-  // Also collect from meals database for any named recipe
-  const allMeals = Object.values(meals).flat();
-  result?.forEach((day, di) => {
-    Object.values(day.comidas || {}).forEach(meal => {
-      if (!meal?.nombre) return;
-      const found = allMeals.find(m => m.name === meal.nombre);
-      if (found?.ingredients) {
-        found.ingredients.forEach(ing => {
-          const key = ing.toLowerCase().replace(/\d+[gml]+\s*/g, '').replace(/\(.*?\)/g, '').trim().split(/[,+·]/)[0].trim();
-          if (key.length < 3) return;
-          if (!ingredientMap[key]) ingredientMap[key] = { label: ing, count: 0, days: [] };
-          ingredientMap[key].count = Math.max(ingredientMap[key].count, 1);
-        });
-      }
-    });
-  });
-
-  // Sort by frequency (most used first = batch cooking wins)
-  const items = Object.entries(ingredientMap)
-    .sort((a, b) => b[1].count - a[1].count)
-    .map(([key, val]) => ({ key, label: val.label, count: val.count }));
-
-  // Group into categories
-  function getCategory(item) {
-    const l = item.toLowerCase();
-    if (/pollo|ternera|salmón|salmon|atún|atun|huevo|clara|whey|proteína|jamón|gambas|bacalao|pavo|requesón/.test(l)) return "🥩 Proteínas";
-    if (/yogur|yogurt|leche|queso|skyr|mozzarella|parmesano|kéfir/.test(l)) return "🥛 Lácteos";
-    if (/arroz|avena|patata|boniato|pan|quinoa|pasta|tortita|granola|pan|brioche/.test(l)) return "🌾 Carbohidratos";
-    if (/brócoli|espinaca|calabacín|berenjena|champiñon|zanahoria|tomate|pepino|lechuga|cebolla|espárrago|coliflor|aguacate|plátano|fresa|arándano|manzana|naranja|mango|fruta|verdura/.test(l)) return "🥦 Frutas y Verduras";
-    if (/almendra|nuez|nueces|cacahuete|pistacho|semilla|chía/.test(l)) return "🥜 Frutos Secos";
-    return "🧂 Condimentos";
+  function toggleMeal(key) {
+    setSelected(p => ({ ...p, [key]: !p[key] }));
+    setShopItems(null); // reset list when selection changes
   }
 
-  const grouped = {};
-  items.forEach(item => {
-    const cat = getCategory(item.label);
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(item);
-  });
+  function selectAll() {
+    const all = {};
+    result?.forEach((day, di) =>
+      SLOT_KEYS.forEach(sk => { if (day.comidas?.[sk]) all[`${di}-${sk}`] = true; })
+    );
+    setSelected(all);
+    setShopItems(null);
+  }
 
-  const totalItems = items.length;
-  const doneCount = Object.keys(checked).length;
+  function clearAll() { setSelected({}); setShopItems(null); }
+
+  function buildList() {
+    const allMealsDB = Object.values(meals).flat();
+    const matched = new Set();
+    result?.forEach((day, di) => {
+      SLOT_KEYS.forEach(sk => {
+        if (!selected[`${di}-${sk}`]) return;
+        const meal = day.comidas?.[sk];
+        if (!meal) return;
+        const found = allMealsDB.find(m => m.name === meal.nombre);
+        const ings = found?.ingredients || found?.ingredientes || meal.ingredientes || [];
+        ings.forEach(ing => matchToShopItem(ing).forEach(n => matched.add(n)));
+      });
+    });
+    const grouped = {};
+    [...matched].forEach(name => {
+      const item = SHOP_ITEMS.find(s => s.name === name);
+      if (!item) return;
+      if (!grouped[item.cat]) grouped[item.cat] = [];
+      grouped[item.cat].push(name);
+    });
+    setShopItems(grouped);
+    setChecked({});
+  }
+
+  const selCount = Object.values(selected).filter(Boolean).length;
 
   return (
-    <div style={{ padding: "0 8px 40px", maxWidth: 720, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, marginTop: 8 }}>
-        <div style={{ fontSize: 9, color: C.muted, letterSpacing: 2 }}>LISTA DE COMPRA SEMANAL</div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontSize: 10, color: C.muted }}>{doneCount}/{totalItems}</span>
-          {doneCount > 0 && (
-            <button onClick={() => setChecked({})}
-              style={{ fontSize: 10, color: C.muted, background: "none", border: `1px solid ${C.border}`,
-                borderRadius: 6, padding: "2px 8px", cursor: "pointer", fontFamily: "inherit" }}>
-              Resetear
+    <div style={{ padding: "0 8px 48px", maxWidth: 720, margin: "0 auto" }}>
+
+      <div style={{ fontSize: 9, color: C.muted, letterSpacing: 2, marginBottom: 10, marginTop: 8 }}>
+        LISTA DE LA COMPRA
+      </div>
+
+      {/* ── Meal selector grid ── */}
+      <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${C.border}`, padding: 12, marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ fontSize: 11, color: C.sub, fontWeight: 600 }}>Selecciona las comidas a incluir</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={selectAll}
+              style={{ fontSize: 10, padding: "3px 9px", borderRadius: 6, border: `1px solid ${C.accent}`,
+                background: C.accent + "18", color: C.accent, cursor: "pointer", fontFamily: "inherit" }}>
+              Todas
             </button>
-          )}
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ background: C.border, borderRadius: 4, height: 4, marginBottom: 16, overflow: "hidden" }}>
-        <div style={{ height: 4, background: C.accent, width: `${totalItems ? (doneCount/totalItems)*100 : 0}%`, transition: "width 0.3s", borderRadius: 4 }}/>
-      </div>
-
-      {Object.entries(grouped).map(([cat, catItems]) => (
-        <div key={cat} style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: 1,
-            borderBottom: `1px solid ${C.border}`, paddingBottom: 6, marginBottom: 8 }}>
-            {cat}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-            {catItems.map(item => {
-              const done = !!checked[item.key];
-              return (
-                <button key={item.key} onClick={() => setChecked(p => ({ ...p, [item.key]: !p[item.key] }))}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px",
-                    background: done ? C.accent + "10" : C.card,
-                    border: `1px solid ${done ? C.accent + "40" : C.border}`,
-                    borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                    border: `2px solid ${done ? C.accent : C.border}`,
-                    background: done ? C.accent : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                  </div>
-                  <div style={{ flex: 1, overflow: "hidden" }}>
-                    <div style={{ fontSize: 11, color: done ? C.muted : C.text,
-                      textDecoration: done ? "line-through" : "none",
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {item.label}
-                    </div>
-                    {item.count > 1 && (
-                      <div style={{ fontSize: 9, color: C.accent }}>× {item.count} días</div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+            <button onClick={clearAll}
+              style={{ fontSize: 10, padding: "3px 9px", borderRadius: 6, border: `1px solid ${C.border}`,
+                background: "none", color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+              Ninguna
+            </button>
           </div>
         </div>
-      ))}
-    </div>
-  );
-}
 
+        {/* Grid: rows = slots, cols = days */}
+        <div style={{ overflowX: "auto" }}>
+          <div style={{ minWidth: 420 }}>
+            {/* Header row */}
+            <div style={{ display: "grid", gridTemplateColumns: "56px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+              <div/>
+              {DAY_SHORT.map(d => (
+                <div key={d} style={{ fontSize: 9, fontWeight: 700, color: C.accent, textAlign: "center" }}>{d}</div>
+              ))}
+            </div>
 
-function ResultView({ result, config, selectedDay, setSelectedDay, onRegenerate, regenerating, onBack, onShop, loading, onMealDetailLoaded }) {
-  const [activeMeal, setActiveMeal] = useState(null); // {dayIdx, slotKey}
+            {/* One row per slot */}
+            {SLOT_KEYS.map(sk => (
+              <div key={sk} style={{ display: "grid", gridTemplateColumns: "56px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
+                <div style={{ fontSize: 9, color: C.muted, display: "flex", alignItems: "center" }}>
+                  {SLOT_SHORT[sk]}
+                </div>
+                {result?.map((day, di) => {
+                  const meal = day.comidas?.[sk];
+                  const key  = `${di}-${sk}`;
+                  const on   = !!selected[key];
+                  if (!meal) return (
+                    <div key={di} style={{ height: 28, background: C.bg, borderRadius: 5,
+                      border: `1px solid ${C.border}`, opacity: 0.3 }}/>
+                  );
+                  return (
+                    <button key={di} onClick={() => toggleMeal(key)}
+                      style={{ height: 28, borderRadius: 5, cursor: "pointer",
+                        background: on ? C.accent : C.bg,
+                        border: `1px solid ${on ? C.accent : C.border}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        transition: "all 0.12s" }}>
+                      {on && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
 
-  const SLOT_KEYS  = ["desayuno", "media_m", "almuerzo", "pre", "cena"];
-  const SLOT_LABELS = { desayuno: "Desayuno", media_m: "Media mañana", almuerzo: "Almuerzo", pre: "Pre-entreno", cena: "Cena" };
-  const GYM_COLOR  = { push: "#1a5c8a", pull: "#3a7d5a", pierna: "#8e24aa", fullbody: "#c47a1a" };
-
-  if (!result?.length) return null;
-
-  const activeDay     = activeMeal ? result[activeMeal.dayIdx]               : null;
-  const activeMealObj = activeDay  ? activeDay.comidas?.[activeMeal.slotKey] : null;
-
-  return (
-    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: C.text }}>
-
-      {/* ── STICKY HEADER ── */}
-      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: "12px 16px",
-        display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 20 }}>
-        <button onClick={onBack}
-          style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
-            padding: "5px 10px", cursor: "pointer", fontSize: 11, color: C.sub, fontFamily: "inherit" }}>
-          ← Editar
+        {/* Generate button */}
+        <button onClick={buildList} disabled={selCount === 0}
+          style={{ width: "100%", marginTop: 12, padding: "11px 0",
+            background: selCount > 0 ? C.accent : C.border,
+            color: "#fff", border: "none", borderRadius: 8,
+            fontSize: 13, fontWeight: 700, cursor: selCount > 0 ? "pointer" : "default",
+            fontFamily: "inherit", transition: "background 0.15s" }}>
+          {selCount > 0 ? `Generar lista (${selCount} comidas) →` : "Selecciona comidas primero"}
         </button>
-        <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, flex: 1, textAlign: "center" }}>
-          Plan semanal
-        </span>
-<div style={{ width: 60 }}/>
       </div>
 
-      {/* ── WEEKLY GRID ── */}
-      <div style={{ overflowX: "auto", padding: "12px 8px" }}>
-        <div style={{ minWidth: 560 }}>
-
-          {/* Day headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-            <div />
-            {result.map((day, i) => {
-              const conf = config.days[i];
-              return (
-                <div key={i} style={{ textAlign: "center", padding: "4px 2px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, marginBottom: 2 }}>{DAYS[i]}</div>
-                  <div style={{ fontSize: 9, color: C.muted }}>{day.kcal_total || "—"}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Training row */}
-          <div style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <span style={{ fontSize: 9, color: C.muted }}>Entreno</span>
+      {/* ── Shopping list result ── */}
+      {shopItems && (() => {
+        const allItems = Object.values(shopItems).flat();
+        const doneCount = Object.values(checked).filter(Boolean).length;
+        return (
+          <div>
+            {/* Progress */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: C.muted }}>{allItems.length} productos · {doneCount} marcados</div>
+              <button onClick={() => setChecked({})}
+                style={{ fontSize: 10, color: C.muted, background: "none", border: `1px solid ${C.border}`,
+                  borderRadius: 6, padding: "2px 8px", cursor: "pointer", fontFamily: "inherit" }}>
+                Resetear marcas
+              </button>
             </div>
-            {result.map((day, i) => {
-              const conf = config.days[i];
-              const tr = day?.entrenamiento;
-              const gc = GYM_COLOR[conf.gym];
-              const noActivity = !conf.gym && !conf.running;
-              return (
-                <div key={i} style={{ background: C.card, borderRadius: 6, padding: "5px 5px",
-                  border: `1px solid ${conf.gym ? gc + "50" : conf.running ? C.accent + "40" : C.border}`,
-                  minHeight: 36, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  {conf.gym && (
-                    <div style={{ fontSize: 9, fontWeight: 700, color: gc, lineHeight: 1.2 }}>
-                      {conf.gym.toUpperCase()}
-                    </div>
-                  )}
-                  {conf.running && (
-                    <div style={{ fontSize: 9, color: C.accent, lineHeight: 1.2 }}>
-                      Run {conf.running}
-                    </div>
-                  )}
-                  {tr?.duracion && (
-                    <div style={{ fontSize: 8, color: C.muted }}>{tr.duracion}</div>
-                  )}
-                  {noActivity && (
-                    <div style={{ fontSize: 9, color: C.muted, textAlign: "center" }}>—</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* One row per meal slot */}
-          {SLOT_KEYS.map(slotKey => (
-            <div key={slotKey} style={{ display: "grid", gridTemplateColumns: "72px repeat(7, 1fr)", gap: 3, marginBottom: 3 }}>
-              {/* Row label */}
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2 }}>{SLOT_LABELS[slotKey]}</span>
-              </div>
-              {/* Each day's cell */}
-              {result.map((day, i) => {
-                const meal = day?.comidas?.[slotKey];
-                const isActive = activeMeal?.dayIdx === i && activeMeal?.slotKey === slotKey;
-                if (!meal) return (
-                  <div key={i} style={{ background: C.card, borderRadius: 6, minHeight: 48,
-                    border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: 9, color: C.muted }}>—</span>
-                  </div>
-                );
-                return (
-                  <button key={i}
-                    onClick={() => setActiveMeal(isActive ? null : { dayIdx: i, slotKey })}
-                    style={{ background: isActive ? C.accent + "20" : C.card,
-                      border: `1px solid ${isActive ? C.accent : C.border}`,
-                      borderRadius: 6, padding: "5px 5px", cursor: "pointer",
-                      fontFamily: "inherit", textAlign: "left", minHeight: 48,
-                      transition: "all 0.12s" }}>
-                    <div style={{ fontSize: 9, fontWeight: 600, color: isActive ? C.accent : C.text,
-                      lineHeight: 1.25, overflow: "hidden", marginBottom: 2,
-                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                      {meal.nombre}
-                    </div>
-                    <div style={{ fontSize: 8, color: C.muted }}>{meal.kcal} kcal</div>
-                  </button>
-                );
-              })}
+            <div style={{ background: C.border, borderRadius: 4, height: 4, marginBottom: 14, overflow: "hidden" }}>
+              <div style={{ height: 4, background: C.accent, borderRadius: 4, transition: "width 0.3s",
+                width: `${allItems.length ? (doneCount / allItems.length) * 100 : 0}%` }}/>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* ── INLINE MEAL DETAIL (shown below grid when cell selected) ── */}
-      {activeMeal && activeMealObj && (
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 8px 8px" }}>
-          <div style={{ background: C.card, borderRadius: 10, border: `1px solid ${C.accent}40`, overflow: "hidden" }}>
-            {/* Detail header */}
-            <div style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              borderBottom: `1px solid ${C.border}` }}>
-              <div>
-                <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1.5, marginBottom: 3 }}>
-                  {DAY_FULL[activeMeal.dayIdx]} · {SLOT_LABELS[activeMeal.slotKey]}
+            {Object.entries(shopItems).map(([cat, items]) => (
+              <div key={cat} style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: 1,
+                  borderBottom: `1px solid ${C.border}`, paddingBottom: 5, marginBottom: 7 }}>
+                  {cat}
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{activeMealObj.nombre}</div>
-                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
-                  {activeMealObj.kcal} kcal · {activeMealObj.prot}g proteína
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                  {items.map(name => {
+                    const done = !!checked[name];
+                    return (
+                      <button key={name} onClick={() => setChecked(p => ({ ...p, [name]: !p[name] }))}
+                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px",
+                          background: done ? C.accent + "12" : C.card,
+                          border: `1px solid ${done ? C.accent + "50" : C.border}`,
+                          borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                          border: `2px solid ${done ? C.accent : C.border}`,
+                          background: done ? C.accent : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                        </div>
+                        <span style={{ fontSize: 11, color: done ? C.muted : C.text,
+                          textDecoration: done ? "line-through" : "none",
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 6, flexShrink: 0, marginLeft: 10 }}>
-                <button onClick={() => setActiveMeal(null)}
-                  style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
-                    padding: "6px 10px", fontSize: 11, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
-                  ✕
-                </button>
-                <button
-                  onClick={() => { onRegenerate(activeMeal.dayIdx, activeMeal.slotKey); setActiveMeal(null); }}
-                  disabled={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
-                  style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8,
-                    padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                  ↻ Cambiar
-                </button>
-              </div>
-            </div>
-            {/* Detail body */}
-            <div style={{ padding: "12px 14px" }}>
-              <MealDetail
-                meal={activeMealObj}
-                slotKey={activeMeal.slotKey}
-                slotLabel={SLOT_LABELS[activeMeal.slotKey]}
-                dayIdx={activeMeal.dayIdx}
-                dayActivity={`${config.days[activeMeal.dayIdx]?.gym || ""} ${config.days[activeMeal.dayIdx]?.running || ""}`.trim()}
-                onRegenerate={onRegenerate}
-                isRegen={regenerating?.dayIdx === activeMeal.dayIdx && regenerating?.slot === activeMeal.slotKey}
-                onDetailLoaded={(detail) => onMealDetailLoaded(activeMeal.dayIdx, activeMeal.slotKey, detail)}
-                hideButton
-              />
-            </div>
+            ))}
           </div>
-        </div>
-      )}
-
-      {/* ── INLINE SHOPPING LIST ── */}
-      <ShoppingListInline result={result} />
-
-
+        );
+      })()}
     </div>
   );
 }
